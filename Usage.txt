@@ -1,0 +1,31 @@
+LuaTool 1.2 by Co0kieMonster
+  Usage: LuaTool <task_select> [task_options] <task_input>
+  Tasks:
+  /decompile (or /d)  -- Lua Decompiler
+  /compile   (or /c)  -- Lua Compiler
+  /compare   (or /cr) -- Lua Compare utility
+  /detect    (or /dt) -- Manila file type detect utility
+
+LuaDec 3.2
+  Usage: LuaTool /decompile [options] <inputfile>
+  Available Options:
+  -o <filename>   specify output file name
+  -dis            don't decompile, just disassemble
+  -f <number>     decompile/disassemble only function number (0 = global block)
+
+LuaC 1.2
+  Usage: LuaTool /compile [options] <inputfile>
+  Available Options:
+  -o <filename>        specify output file name
+  -s                   strip debug information
+  -r <n> <luac_file>   replace function <n> in <luac_file> with <inputfile>
+
+LuaCompare 1.2.1
+  Usage: LuaTool /compare [options] <original.luac> <newfile.lua(c)>
+  Available Options:
+  -o <filename>   specify output file name
+  -s              side by side file comparison
+  -du             disable underline
+
+ManilaDetect
+  Usage: LuaTool /detect <inputfile>

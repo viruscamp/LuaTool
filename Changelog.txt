@@ -1,0 +1,78 @@
+LuaTool changelog:
+# LuaTool v1.2
+-updated LuaDec to v3.2, LuaC to v1.2 and LuaCompare to v1.2.1
+# LuaTool v1.1
+-updated LuaDec to v3.1, LuaC to v1.1 and LuaCompare to v1.2
+
+LuaDec changelog:
+# LuaDec v3.2
+-Local guesser improvements
+---major overhaul - gives much better results
+-Conditionals handling improvements
+---fixed elseif not being recognised in some cases
+---added partial support for complex inline boolean assingment
+-General improvements
+---fixed single function decompile
+---fixed table assignments where there are more then 16 values
+---better error handling
+# LuaDec v3.1
+-Conditionals handling improvements
+---wrote a brand new algorithm for handling complex logic expressions
+---fixed falsely detected generic for loops
+---fixed misplaced if end, because of end-to-break optimization
+-Local guesser improvements
+---declarations at CALL before RETURN
+-General improvements
+---fixed indents not behaving properly in some cases
+---fixed LOADNIL assignments where the destinations are local variables
+---decompiler now displays success rate after decompile
+---added SETLIST handling
+# LuaDec v3.0.4
+-General improvements:
+---added back error messages
+---fixed variable arguments handling
+---fixed multiple inline assignments
+---fixed a rare if ending misplacement
+-Local guesser improvements at:
+---inline bool assignments
+---table in table situations
+---TAILCALLs
+---CALLs which return multiple results
+---locals declared just before TEST ops
+---SETTABLE where b isn't a constant
+# LuaDec v3.0
+-core rewrite and cleanup
+-more accurate especially with conditionals and loops
+-some miscellaneous accuracy improvements
+-added extra info to script header (date, time, file name and manila name)
+-LuaCompare updated to v1.0.1 (compatibility)
+# LuaDec v2.1
+- Less crashing:
+--- added a failsafe for crashing on bad registers
+--- fixed crash on SETUPVAL
+--- fixed crash on SETLIST
+- Better conditional handling:
+--- fixed handling of deeper nested else and elseif
+--- fixed handling of empty if-end and else-end blocks
+--- added break handling
+- Better table handling:
+--- fixed inline table assignments
+--- fixed handling of numerically indexed tables 
+- Adjustments to local guesser:
+--- fixed guessing for inline table assignments
+--- fixed guessing for SETGLOBAL and SETUPVAL at PC 1
+
+LuaC changelog:
+# LuaC v1.2
+-added binary function replacement
+# LuaC v1.1
+-added "continue" statement
+
+LuaCompare changelog:
+# LuaCompare v1.2.1
+-small change to support single function decompile
+# LuaCompare v1.2
+-pre-compare disassembly is now done internally instead of writing to disk and reading
+-added a console message with match percentage
+# LuaCompare v1.1
+-initial version integrated in LuaTool
