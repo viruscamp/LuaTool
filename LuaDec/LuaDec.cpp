@@ -19,11 +19,13 @@ void LuaDec::decompile(string outputFileName, int functionNum)
 	output.create(outputFileName);
 	output.addText(makeHeader());
 
+	/*
 	if (ManilaFile::detectManilaType(inputName) != ManilaFile::LUAC)
 	{
 		errors.set("Input is not a valid LUAC file.");
 		return;
 	}
+	*/
 
 	Function luaGlobal(inputName.c_str());
 	if (luaGlobal.errors.getLast() != "")
@@ -46,12 +48,14 @@ void LuaDec::disassemble(string outputFileName, int functionNum)
 	output.create(outputFileName);
 	output.addText(makeHeader(true));
 
+	/*
 	if (ManilaFile::detectManilaType(inputName) != ManilaFile::LUAC
 		&& ManilaFile::detectManilaType(inputName) != ManilaFile::LUA)
 	{
 		errors.set("Input is not a valid LUAC file.");
 		return;
 	}
+	*/
 
 	Function luaGlobal(inputName.c_str());
 	if (luaGlobal.errors.getLast() != "")
@@ -75,12 +79,14 @@ TextFile LuaDec::disassembleForCompare()
 	output.create("dummy"); // no file s actually created
 	output.addText(makeHeader(true));
 
+	/*
 	if (ManilaFile::detectManilaType(inputName) != ManilaFile::LUAC
 		&& ManilaFile::detectManilaType(inputName) != ManilaFile::LUA)
 	{
 		errors.set("Input is not a valid LUAC file.");
 		return output;
 	}
+	*/
 
 	Function luaGlobal(inputName.c_str());
 	if (luaGlobal.errors.getLast() != "")
