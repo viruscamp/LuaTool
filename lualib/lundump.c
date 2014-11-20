@@ -19,9 +19,6 @@
 #include "lstring.h"
 #include "lundump.h"
 #include "lzio.h"
-#include "iconv.h"
-
-iconv_t deunicode;
 
 typedef struct {
  lua_State* L;
@@ -56,7 +53,7 @@ static void LoadBlock(LoadState* S, void* b, size_t size)
 
 static int LoadChar(LoadState* S)
 {
- wchar_t x;
+ char x;
  LoadVar(S,x);
  return x;
 }
@@ -69,44 +66,23 @@ static int LoadInt(LoadState* S)
  return x;
 }
 
-/*struct dd {
-	int a,b;
-};*/
-
 static lua_Number LoadNumber(LoadState* S)
 {
-	int d;
- LoadVar(S,d);
-
- return (double)d/(double)0x10000;
+ lua_Number x;
+ LoadVar(S,x);
+ return x;
 }
 
 static TString* LoadString(LoadState* S)
 {
- size_t size,inbytesleft,outbytesleft;
- char* input;
- char* output;
- char* memory,*s2,*s;
- int result;
+ size_t size;
  LoadVar(S,size);
  if (size==0)
   return NULL;
  else
  {
-  input = malloc(size*2);
-	output = malloc(size*2);
-	memory = input;
-	s2 = output;
-  LoadBlock(S,input,size);
-	inbytesleft = size;
-	outbytesleft = size;
-	iconv(deunicode, NULL, NULL, NULL, NULL);
-	result = iconv(deunicode, &memory, &inbytesleft, &s2, &outbytesleft);
-	size = size-outbytesleft;
-	s=luaZ_openspace(S->L,S->b,size);
-	strcpy(s,output);
-	free(input);
-	free(output);
+  char* s=luaZ_openspace(S->L,S->b,size);
+  LoadBlock(S,s,size);
   return luaS_newlstr(S->L,s,size-1);		/* remove trailing '\0' */
  }
 }
@@ -206,11 +182,10 @@ static Proto* LoadFunction(LoadState* S, TString* p)
 
 static void LoadHeader(LoadState* S)
 {
-	int i;
- wchar_t h[LUAC_HEADERSIZE];
- wchar_t s[LUAC_HEADERSIZE];
+ char h[LUAC_HEADERSIZE];
+ char s[LUAC_HEADERSIZE];
  luaU_header(h);
- LoadBlock(S,s,LUAC_HEADERSIZE*2);
+ LoadBlock(S,s,LUAC_HEADERSIZE);
  IF (memcmp(h,s,LUAC_HEADERSIZE)!=0, "bad header");
 }
 
@@ -219,9 +194,7 @@ static void LoadHeader(LoadState* S)
 */
 Proto* luaU_undump (lua_State* L, ZIO* Z, Mbuffer* buff, const char* name)
 {
-	Proto* f;
-  LoadState S;
-	deunicode = iconv_open("UTF-8","UTF-16LE");
+ LoadState S;
  if (*name=='@' || *name=='=')
   S.name=name+1;
  else if (*name==LUA_SIGNATURE[0])
@@ -232,26 +205,23 @@ Proto* luaU_undump (lua_State* L, ZIO* Z, Mbuffer* buff, const char* name)
  S.Z=Z;
  S.b=buff;
  LoadHeader(&S);
- f = LoadFunction(&S,luaS_newliteral(L,"=?"));
- iconv_close(deunicode);
- return f;
-
+ return LoadFunction(&S,luaS_newliteral(L,"=?"));
 }
 
 /*
 * make header
 */
-void luaU_header (wchar_t* h)
+void luaU_header (char* h)
 {
  int x=1;
  memcpy(h,LUA_SIGNATURE,sizeof(LUA_SIGNATURE)-1);
- h+=4;//sizeof(LUA_SIGNATURE)-1;
- *h++=(wchar_t)LUAC_VERSION;
- *h++=(wchar_t)LUAC_FORMAT;
- *h++=(wchar_t)*(wchar_t*)&x;				/* endianness */
- *h++=(wchar_t)sizeof(int);
- *h++=(wchar_t)sizeof(size_t);
- *h++=(wchar_t)sizeof(Instruction);
- *h++=(wchar_t)sizeof(int);
- *h++=(wchar_t)(((int)0.5)==0);		/* is lua_Number integral? */
+ h+=sizeof(LUA_SIGNATURE)-1;
+ *h++=(char)LUAC_VERSION;
+ *h++=(char)LUAC_FORMAT;
+ *h++=(char)*(char*)&x;				/* endianness */
+ *h++=(char)sizeof(int);
+ *h++=(char)sizeof(size_t);
+ *h++=(char)sizeof(Instruction);
+ *h++=(char)sizeof(lua_Number);
+ *h++=(char)(((lua_Number)0.5)==0);		/* is lua_Number integral? */
 }

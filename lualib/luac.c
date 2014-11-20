@@ -29,7 +29,6 @@
 static int listing=0;			/* list bytecodes? */
 static int dumping=1;			/* dump bytecodes? */
 static int stripping=0;			/* strip debug information? */
-static int lds2=0;
 static char Output[]={ OUTPUT };	/* default output file name */
 static const char* output=Output;	/* actual output file name */
 static const char* progname=PROGNAME;	/* actual program name */
@@ -97,8 +96,6 @@ static int doargs(int argc, char* argv[])
    dumping=0;
   else if (IS("-s"))			/* strip debug information */
    stripping=1;
-//  else if (IS("-l2"))			/* strip debug information */
-//   lds2=1;
   else if (IS("-v"))			/* show version */
    ++version;
   else					/* unknown option */
@@ -153,12 +150,6 @@ static int writer(lua_State* L, const void* p, size_t size, void* u)
  return (fwrite(p,size,1,(FILE*)u)!=1) && (size!=0);
 }
 
-static int writer_null(lua_State* L, const void* p, size_t size, void* u)
-{
- UNUSED(L);
- return 1;
-}
-
 struct Smain {
  int argc;
  char** argv;
@@ -184,7 +175,7 @@ static int pmain(lua_State* L)
   FILE* D= (output==NULL) ? stdout : fopen(output,"wb");
   if (D==NULL) cannot("open");
   lua_lock(L);
-	luaU_dump(L,f,writer,D,stripping);
+  luaU_dump(L,f,writer,D,stripping);
   lua_unlock(L);
   if (ferror(D)) cannot("write");
   if (fclose(D)) cannot("close");

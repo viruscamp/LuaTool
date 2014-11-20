@@ -1,8 +1,9 @@
 /*
-** $Id: lparser.c,v 2.42.1.3 2007/12/28 15:32:23 roberto Exp $
+** $Id: lparser.c,v 2.42.1.4 2011/10/21 19:31:42 roberto Exp $
 ** Lua Parser
 ** See Copyright Notice in lua.h
 */
+
 
 #include <string.h>
 
@@ -39,7 +40,6 @@
 typedef struct BlockCnt {
   struct BlockCnt *previous;  /* chain */
   int breaklist;  /* list of jumps out of this loop */
-  int continuelist;
   lu_byte nactvar;  /* # active locals outside the breakable structure */
   lu_byte upval;  /* true if some variable in the block is an upvalue */
   lu_byte isbreakable;  /* true if `block' is a loop */
@@ -284,7 +284,6 @@ static void enterlevel (LexState *ls) {
 
 static void enterblock (FuncState *fs, BlockCnt *bl, lu_byte isbreakable) {
   bl->breaklist = NO_JUMP;
-  bl->continuelist = NO_JUMP; // continue mod
   bl->isbreakable = isbreakable;
   bl->nactvar = fs->nactvar;
   bl->upval = 0;
@@ -375,9 +374,9 @@ static void close_func (LexState *ls) {
   lua_assert(luaG_checkcode(f));
   lua_assert(fs->bl == NULL);
   ls->fs = fs->prev;
-  L->top -= 2;  /* remove table and prototype from the stack */
   /* last token read was anchored in defunct function; must reanchor it */
   if (fs) anchor_token(ls);
+  L->top -= 2;  /* remove table and prototype from the stack */
 }
 
 
@@ -972,67 +971,20 @@ static int cond (LexState *ls) {
   return v.f;
 }
 
-#define LUA_MAXBREAKLEVEL 100
 
 static void breakstat (LexState *ls) {
-  // continue mod /* stat -> BREAK [loop number] */
   FuncState *fs = ls->fs;
   BlockCnt *bl = fs->bl;
   int upval = 0;
-  int levels = 1; // cm
-  if (testnext(ls, TK_NUMBER)) { // cm
-    if (ls->t.seminfo.r != floor(ls->t.seminfo.r))
-      luaX_syntaxerror(ls, "loop block number must be integer");
-    levels = (int) ls->t.seminfo.r;
-    if (levels < 1 || levels > LUA_MAXBREAKLEVEL)
-      luaX_syntaxerror(ls, "loop block number out of range");
-  } // cm
-  while (levels-- > 0) { // cm
-	  while (bl && !bl->isbreakable) {
-		upval |= bl->upval;
-		bl = bl->previous;
-	  }
-
-	  if (bl && levels > 0) // cm
-	      bl = bl->previous;
-  }// cm
+  while (bl && !bl->isbreakable) {
+    upval |= bl->upval;
+    bl = bl->previous;
+  }
   if (!bl)
     luaX_syntaxerror(ls, "no loop to break");
   if (upval)
     luaK_codeABC(fs, OP_CLOSE, bl->nactvar, 0, 0);
   luaK_concat(fs, &bl->breaklist, luaK_jump(fs));
-}
-
-static void continuestat (LexState *ls) {
-  // continue mod /* stat -> CONTINUE [loop number] */
-  FuncState *fs = ls->fs;
-  BlockCnt *bl = fs->bl;
-  BlockCnt *nextbl;
-  int upval = 0, wasupval;
-  int levels = 1;
-  if (testnext(ls, TK_NUMBER)) {
-    if (ls->t.seminfo.r != floor(ls->t.seminfo.r))
-      luaX_syntaxerror(ls, "loop block number must be integer");
-    levels = (int) ls->t.seminfo.r;
-    if (levels < 1 || levels > LUA_MAXBREAKLEVEL)
-      luaX_syntaxerror(ls, "loop block number out of range");
-  }
-  while (levels-- > 0) {
-	wasupval = upval;
-	while (bl && !bl->isbreakable) {
-	  upval |= bl->upval;
-      bl = bl->previous;
-	}
-    if (bl && levels > 0) {
-  	  nextbl = bl;
-      bl = bl->previous;
-	}
-  }
-  if (!bl)
-    luaX_syntaxerror(ls, "no loop to continue");
-  if (wasupval)
-    luaK_codeABC(fs, OP_CLOSE, nextbl->nactvar, 0, 0);
-  luaK_concat(fs, &bl->continuelist, luaK_jump(fs));
 }
 
 
@@ -1049,7 +1001,6 @@ static void whilestat (LexState *ls, int line) {
   checknext(ls, TK_DO);
   block(ls);
   luaK_patchlist(fs, luaK_jump(fs), whileinit);
-  luaK_patchtohere(fs, bl.continuelist); // continue mod
   check_match(ls, TK_END, TK_WHILE, line);
   leaveblock(fs);
   luaK_patchtohere(fs, condexit);  /* false conditions finish the loop */
@@ -1066,7 +1017,6 @@ static void repeatstat (LexState *ls, int line) {
   enterblock(fs, &bl2, 0);  /* scope block */
   luaX_next(ls);  /* skip REPEAT */
   chunk(ls);
-  luaK_patchtohere(fs, bl1.continuelist); // continue mod
   check_match(ls, TK_UNTIL, TK_REPEAT, line);
   condexit = cond(ls);  /* read condition (inside scope block) */
   if (!bl2.upval) {  /* no upvalues? */
@@ -1106,7 +1056,6 @@ static void forbody (LexState *ls, int base, int line, int nvars, int isnum) {
   luaK_reserveregs(fs, nvars);
   block(ls);
   leaveblock(fs);  /* end of scope for declared variables */
-  luaK_patchtohere(fs, bl.previous->continuelist); // continue mod
   luaK_patchtohere(fs, prep);
   endfor = (isnum) ? luaK_codeAsBx(fs, OP_FORLOOP, base, NO_JUMP) :
                      luaK_codeABC(fs, OP_TFORLOOP, base, 0, nvars);
@@ -1363,11 +1312,6 @@ static int statement (LexState *ls) {
     case TK_BREAK: {  /* stat -> breakstat */
       luaX_next(ls);  /* skip BREAK */
       breakstat(ls);
-      return 1;  /* must be last statement */
-    }
-	case TK_CONTINUE: {  /* stat -> continuestat */
-	  luaX_next(ls);
-      continuestat(ls);
       return 1;  /* must be last statement */
     }
     default: {

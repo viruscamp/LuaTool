@@ -1,3 +1,6 @@
+Original Url:
+http://forum.xda-developers.com/showthread.php?t=568281
+
 Intro:
 This is an all-in-one tool for decompiling, compiling and comparing lua scripts found in Manila (TouchFLO 3D / Sense).
 All this is a continuation of sztupy's original work: Lua 5.1 tools. 

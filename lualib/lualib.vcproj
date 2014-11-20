@@ -62,7 +62,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\lualib\iconv.lib&quot; &quot;$(SolutionDir)\lualib\charset.lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -127,7 +126,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="&quot;$(SolutionDir)\lualib\iconv.lib&quot; &quot;$(SolutionDir)\lualib\charset.lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -280,10 +278,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\iconv.h"
-				>
-			</File>
 			<File
 				RelativePath=".\lapi.h"
 				>

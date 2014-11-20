@@ -62,6 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(TargetDir)\LuaC.lib&quot; &quot;$(TargetDir)\LuaDec.lib&quot; &quot;$(TargetDir)\LuaCompare.lib&quot;"
+				OutputFile="$(OutDir)\luatool_dec.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -136,7 +137,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(TargetDir)\LuaC.lib&quot; &quot;$(TargetDir)\LuaDec.lib&quot; &quot;$(TargetDir)\LuaCompare.lib&quot;"
-				OutputFile="$(OutDir)\luadec.exe"
+				OutputFile="$(OutDir)\luatool_dec.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"

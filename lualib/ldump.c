@@ -11,12 +11,9 @@
 
 #include "lua.h"
 
-#include "iconv.h"
 #include "lobject.h"
 #include "lstate.h"
 #include "lundump.h"
-
-iconv_t deunicode;
 
 typedef struct {
  lua_State* L;
@@ -41,7 +38,7 @@ static void DumpBlock(const void* b, size_t size, DumpState* D)
 
 static void DumpChar(int y, DumpState* D)
 {
- wchar_t x=(wchar_t)y;
+ char x=(char)y;
  DumpVar(x,D);
 }
 
@@ -51,9 +48,8 @@ static void DumpInt(int x, DumpState* D)
 }
 
 static void DumpNumber(lua_Number x, DumpState* D)
-{	
-  int d = (int)(x*0x10000);
-	DumpVar(d,D);
+{
+ DumpVar(x,D);
 }
 
 static void DumpVector(const void* b, int n, size_t size, DumpState* D)
@@ -71,29 +67,9 @@ static void DumpString(const TString* s, DumpState* D)
  }
  else
  {
-  size_t inbytesleft,outbytesleft;
-  char* input;
-  char* output;
-  char* memory,*s2;
-  int result;
   size_t size=s->tsv.len+1;		/* include trailing '\0' */
-
-  input = malloc(size*2);
-	output = malloc(size*2);
-	memory = input;
-	s2 = output;
-
-	strcpy(input,getstr(s));
-	inbytesleft = size;
-	outbytesleft = size*2;
-	iconv(deunicode, NULL, NULL, NULL, NULL);
-	result = iconv(deunicode, &memory, &inbytesleft, &s2, &outbytesleft);
-	//printf("%d %d\n",result,size);
-	size = size*2-outbytesleft;
   DumpVar(size,D);
-  DumpBlock(output,size,D);
-	free(input);
-	free(output);
+  DumpBlock(getstr(s),size,D);
  }
 }
 
@@ -166,9 +142,9 @@ static void DumpFunction(const Proto* f, const TString* p, DumpState* D)
 
 static void DumpHeader(DumpState* D)
 {
- wchar_t h[LUAC_HEADERSIZE];
+ char h[LUAC_HEADERSIZE];
  luaU_header(h);
- DumpBlock(h,LUAC_HEADERSIZE*2,D);
+ DumpBlock(h,LUAC_HEADERSIZE,D);
 }
 
 /*
@@ -177,7 +153,6 @@ static void DumpHeader(DumpState* D)
 int luaU_dump (lua_State* L, const Proto* f, lua_Writer w, void* data, int strip)
 {
  DumpState D;
- deunicode = iconv_open("UTF-16LE","UTF-8");
  D.L=L;
  D.writer=w;
  D.data=data;
@@ -185,6 +160,5 @@ int luaU_dump (lua_State* L, const Proto* f, lua_Writer w, void* data, int strip
  D.status=0;
  DumpHeader(&D);
  DumpFunction(f,NULL,&D);
- iconv_close(deunicode);
  return D.status;
 }

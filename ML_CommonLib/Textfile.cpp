@@ -118,18 +118,26 @@ int TextFile::writeTo(string filename) const
 	if (textLines.empty())
 		return 0;
 
-	ofstream outFile(filename.c_str());
+	streambuf * buf;
+	ofstream outFile;
+	if (filename == "") {
+		buf = cout.rdbuf();
+	} else {
+		outFile.open(filename.c_str());
+		buf = outFile.rdbuf();
+	}
+	std::ostream output(buf);
 
 	// error check
-	if (!outFile)
+	if (!output)
 		return 1; // can't write to file
 
 	// write every line
 	list<string>::const_iterator it;
-	outFile << *textLines.begin();
+	output << *textLines.begin();
 	for (it = textLines.begin(), it++; it != textLines.end(); it++)
 	{
-		outFile << endl << *it;
+		output << endl << *it;
 	}
 	return 1;
 }

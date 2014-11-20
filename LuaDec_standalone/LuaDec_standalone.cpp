@@ -61,11 +61,14 @@ int main(int argn, char* argv[])
 	inputName = args[args.size()-1];
 
 	if (outputName == "")
-	{ // default output name
+	{
+		/*
+		// default output name
 		if (isDisassemble)
 			outputName = inputName + ".dis.lua";
 		else
 			outputName = inputName + ".lua";
+		*/
 	}
 
 	// disassemble/decompile task
