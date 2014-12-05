@@ -59,10 +59,7 @@ void Function::buildFromProto(Proto* f)
 		for (int i=0; i < f->sizep; i++)
 		{
 			stringstream ss;
-			if (isGlobal) 
-				ss << i+1;
-			else
-				ss << funcNumber << "_" << i+1;
+			ss << funcNumber << "_" << i;
 
 			map<int, string> upvals = getUpValues(f, i);
 			subFunctions[i] = Function(f->p[i], ss.str(), upvals);
@@ -223,4 +220,50 @@ string Function::getDecompiledCode() const
 		return "SingleFunction = " + decCode;
 	else
 		return decCode; 
+}
+
+
+Function* Function::findSubFunction(const string funcnumstr) {
+	Function* cf = this;
+	const char* startstr = funcnumstr.c_str();
+	const char* endstr;
+
+	int c = atoi(startstr);
+	if (c != 0) {
+		return NULL;
+	}
+	endstr = strchr(startstr, '_');
+	startstr = endstr + 1;
+	stringstream realfuncnumstr;
+	realfuncnumstr << "0";
+
+	while (!(endstr == NULL)) {
+		c = atoi(startstr);
+		if (c < 0 || c >= cf->subFunctions.size()) {
+			return NULL;
+		}
+		cf = &(cf->subFunctions[c]);
+		endstr = strchr(startstr, '_');
+		startstr = endstr + 1;
+		realfuncnumstr << "_" << c;
+	}
+	cf->funcNumber = realfuncnumstr.str();
+	return cf;
+}
+
+string Function::listUpvalues()
+{
+	if (upvalues.size() == 0)
+		return string("");
+
+	stringstream ss;
+	map<int, string>::iterator it;
+    for (it = upvalues.begin(); it != upvalues.end(); it++)
+    {
+		if (it != upvalues.begin())
+			ss << ", ";
+        ss << it->second;
+    }
+
+	return ss.str();
 }

@@ -44,6 +44,9 @@ public:
 
 	Function* getSubfunction(unsigned i);
 
+	Function* findSubFunction(const string funcnumstr);
+
+	string listUpvalues();
 private:
 	void buildFromProto(Proto* f); // build function from proto
 	map<int, string> getUpValues(Proto* f, int numFunc); // gets upvalues for subfunctions

@@ -16,6 +16,7 @@ void printLuaDecUsage(string message)
  		"  Available Options:\n"
  		"  -o <filename>   specify output file name\n"
  		"  -dis            don't decompile, just disassemble\n"
+ 		"  -pf             print all function number\n";
  		"  -f <number>     decompile/disassemble only function number (0 = global block)\n";
 }
 
@@ -26,7 +27,8 @@ int main(int argn, char* argv[])
 		args[i].assign(argv[i]);
 
 	bool isDisassemble = false;
-	int functionNum = 0;
+	bool isPrintFuncStructure = false;
+	string functionNum = "0";
 	string inputName = "";
 	string outputName = "";
 	
@@ -41,7 +43,7 @@ int main(int argn, char* argv[])
 		}
 		else if (args[i] == "-f")
 		{	// only decompile this function
-			functionNum = atoi(args[i+1].c_str());
+			functionNum = args[i+1];
 			numOptions +=2;
 			i++;
 		}
@@ -50,6 +52,11 @@ int main(int argn, char* argv[])
 			outputName = args[i+1];
 			numOptions +=2;
 			i++;
+		}
+		else if (args[i] == "-pf")
+		{
+			isPrintFuncStructure = true;
+			numOptions +=1;
 		}
 	}
 	// check if options were valid
@@ -73,7 +80,11 @@ int main(int argn, char* argv[])
 
 	// disassemble/decompile task
 	LuaDec ld(inputName);
-	if (isDisassemble)
+	if (isPrintFuncStructure)
+	{
+		openAndPrint(inputName);
+	}
+	else if (isDisassemble)
 	{
 		ld.disassemble(outputName, functionNum);
 		if (ld.errors.getLast() != "")
@@ -95,6 +106,7 @@ int main(int argn, char* argv[])
 	}
 
 #ifdef _DEBUG
+	cout << endl;
 	system("PAUSE");
 #endif
 

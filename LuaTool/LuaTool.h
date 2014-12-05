@@ -33,7 +33,7 @@ public:
 
 	static const string version;
 private:
-	void singleLuaDec(string inputName, string outputName, bool isDisassemble, int functionNum);
+	void singleLuaDec(string inputName, string outputName, bool isDisassemble, const string functionNum);
 
 	int m9extract(string inputFileName, string outputDir);
 

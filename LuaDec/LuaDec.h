@@ -20,8 +20,8 @@ class LuaDec
 public:
 	LuaDec(string inputFileName); // decompile from file
 
-	void decompile(string outputFileName, int functionNum = 0);
-	void disassemble(string outputFileName, int functionNum = 0);
+	void decompile(string outputFileName, string functionNum = "0");
+	void disassemble(string outputFileName, string functionNum = "0");
 	TextFile disassembleForCompare(); // used to directly pass the dissasembly to LuaCompare instead of writing to disk 
 
 	string manilaName; // full manila name of this file
@@ -38,5 +38,9 @@ private:
 
 	static ManilaNames manilaNames;
 };
+
+void printFuncStructure(const Proto* f, const string indent);
+
+void openAndPrint(string inputName);
 
 #endif

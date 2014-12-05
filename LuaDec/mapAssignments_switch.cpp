@@ -367,7 +367,7 @@ void Assignments::opReturn()
 void Assignments::opClosure()
 {
 	// cosmetic: write an empty line before first function
-	if (func->subFunctions[iOp.bx].funcNumber == "1")
+	if (func->subFunctions[iOp.bx].funcNumber == "0_0")
 		add(" ");
 
 	// decompile subfunction

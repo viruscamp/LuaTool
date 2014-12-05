@@ -24,9 +24,11 @@ char getPrefix(int x)
 
 string Function::disassemble()
 {
-	// TODO: print name
 	stringstream ssHeader;
-	ssHeader << "; Name:            \n";
+	ssHeader << "; Function #" << funcNumber << ":" << endl;
+	ssHeader << ";" << endl;
+	// TODO: print name
+	//ssHeader << "; Name:            \n";
 	ssHeader << "; Defined at line: " << lineDefined << endl;
 	ssHeader << "; #Upvalues:       " << upvalues.size() << endl;
 	ssHeader << "; #Parameters:     " << numParameters << endl;
@@ -339,11 +341,7 @@ string Function::disassemble()
 			  break;
 		  case OP_CLOSURE:
 			  line << "R" << op.a <<" "<< op.bx;
-				
-			  if (funcNumber == "0")
-				  lend << "R" << op.a <<" := closure(Function #" << op.bx+1 << ")";
-			  else
-				  lend << "R" << op.a <<" := closure(Function #" << funcNumber <<"."<< op.bx+1 << ")";
+			  lend << "R" << op.a <<" := closure(Function #" << funcNumber <<"_"<< op.bx << ")";
 			  break;
 		  default:
 			  break;
@@ -362,14 +360,6 @@ string Function::disassemble()
 	if (subFunctions.empty() != true)
 	{	
 		for (unsigned int i=0; i < subFunctions.size(); i++) {
-			stringstream ss;
-			if (funcNumber == "0")
-				ss << i+1;
-			else
-				ss << funcNumber << "." << i+1;
-
-			addDisLine("; Function #" + ss.str() + ":");
-			addDisLine(";");
 			addDisLine(subFunctions[i].disassemble());
 		}
 	}

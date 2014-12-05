@@ -21,8 +21,6 @@ void Locals::mapFunction(Function* functionToMap)
 
 	// debug
 	df = false;
-	if (func->funcNumber == "71")
-		df = true;
 
 	if (func->locals.size() > 0)
 		return; // local info wasn't stripted, no need to map locals

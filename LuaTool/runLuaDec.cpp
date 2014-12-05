@@ -29,7 +29,7 @@ void LuaTool::runLuaDec()
 {
 	bool isDisassemble = false;
 	bool isMulti = false;
-	int functionNum = 0;
+	string functionNum = "";
 	string inputName = "";
 	string outputName = "";
 	
@@ -44,7 +44,7 @@ void LuaTool::runLuaDec()
 		}
 		else if (args[i] == "-f")
 		{	// only decompile this function
-			functionNum = atoi(args[i+1].c_str());
+			functionNum = args[i+1];
 			numOptions +=2;
 			i++;
 		}
@@ -66,7 +66,7 @@ void LuaTool::runLuaDec()
 	singleLuaDec(inputName, outputName, isDisassemble, functionNum);
 }
 
-void LuaTool::singleLuaDec(string inputName, string outputName, bool isDisassemble, int functionNum)
+void LuaTool::singleLuaDec(string inputName, string outputName, bool isDisassemble, const string functionNum)
 {
 	if (outputName == "")
 	{ // default output name
@@ -104,7 +104,7 @@ void LuaTool::singleLuaDec(string inputName, string outputName, bool isDisassemb
 		LuaCompare lc(inputName, outputName);
 
 		// in case of bad decompile produce compare file and disassembly
-		if (lc.compare(functionNum) == false)
+		if (lc.compare(atoi(functionNum.c_str())) == false)
 		{
 			lc.writeTo(cmpOutput);
 
