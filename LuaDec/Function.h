@@ -31,7 +31,7 @@ class Function
 // ===================== Constructors =====================
 public:
 	Function(const char* inputName); // global block constructor - from file
-	Function() : isGlobal(false) {}; // default constructor
+	Function() : isGlobal(false), nosub(false) {}; // default constructor
 private:
 	Function(Proto* f, string number, map<int,string> upvals); // subfunction constructor
 
@@ -39,7 +39,8 @@ private:
 public:
 	string disassemble();
 	
-	string decompile(int indent = 0);
+	string decompile(int indent = 0, bool nosub = false);
+	string decompileStub(int indent = 0);
 	string getDecompiledCode() const;
 
 	Function* getSubfunction(unsigned i);
@@ -92,6 +93,8 @@ private:
 	int codeSize; // total number of opcodes
 	map<PcAddr, Op> opMap; // all function ops, mapped by program counter
 	map<int, Function> subFunctions; // map of subfunctions
+
+	bool nosub;
 
 // ======================= Friends ========================
 public: 

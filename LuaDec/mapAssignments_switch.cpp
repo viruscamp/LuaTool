@@ -386,7 +386,15 @@ void Assignments::opClosure()
 
 	// decompile subfunction
 	stringstream decompiledFunction;
-	decompiledFunction << sub.decompile(func->indent);
+
+	if (!func->nosub)
+	{
+		decompiledFunction << sub.decompile(func->indent);
+	}
+	else
+	{
+		decompiledFunction << sub.decompileStub(func->indent);
+	}
 
 	// cosmetic: write an empty line after ground level functions
 	if (func->indent == 0)

@@ -5,7 +5,7 @@ using namespace std;
 
 // Global block constructors
 Function::Function(const char* inputName)
-: codeSize(0), funcNumber("0"), isGlobal(true)
+: codeSize(0), funcNumber("0"), isGlobal(true), nosub(false)
 {
 	// open lua state
 	lua_State* L;
@@ -33,7 +33,7 @@ Function::Function(const char* inputName)
 
 // Subfunction constructor
 Function::Function(Proto *f, string number, map<int, string> upvals)
-: funcNumber(number), isGlobal(false), upvalues(upvals)
+: funcNumber(number), isGlobal(false), upvalues(upvals), nosub(false)
 {
 	buildFromProto(f);
 }

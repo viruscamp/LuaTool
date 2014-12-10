@@ -3,9 +3,12 @@
 #include <sstream>
 using namespace std;
 
-string Function::decompile(int funcIndent)
+string Function::decompile(int funcIndent, bool nosub)
 {
 	indent = funcIndent;
+
+	bool nosub_saved = this->nosub;
+	this->nosub = nosub;
 
 	// the decompile is done in multiple passes
 	// this order of the passes is strict
@@ -47,6 +50,8 @@ string Function::decompile(int funcIndent)
 		indent--;
 		addPartial("end");
 	}
+
+	this->nosub = nosub_saved;
 
 	return decCode;
 }
@@ -137,4 +142,22 @@ void Function::startOrEndBlock(const PcAddr pc)
 		addStatement("if " + ifBlocks.getIfStatement(pc) + " then");
 		indent++;
 	}
+}
+
+string Function::decompileStub(int funcIndent)
+{
+	indent = funcIndent;
+
+	generateHeader();
+
+	if (this->upvalues.size() > 0) {
+		stringstream ss;
+		ss << "local _upvalues_ = {" << listUpvalues() << "};";
+		addStatement(ss.str());
+	}
+
+	indent--;
+	addPartial("end");
+
+	return decCode;
 }
