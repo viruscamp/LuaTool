@@ -366,13 +366,27 @@ void Assignments::opReturn()
 
 void Assignments::opClosure()
 {
+	Function sub = func->subFunctions[iOp.bx];
 	// cosmetic: write an empty line before first function
-	if (func->subFunctions[iOp.bx].funcNumber == "0_0")
+	if (sub.funcNumber == "0_0")
 		add(" ");
+
+	// fix upvalue name with local name
+	for (int i=0; i<sub.upvalues.size(); i++)
+	{
+		Op curOp = func->opMap[pc+i+1];
+		if (curOp.opCode == OP_MOVE) 
+		{
+			if (func->reg[curOp.b].isLocal)
+			{
+				sub.upvalues[i] = func->reg[curOp.b].getValue();
+			}
+		}
+	}
 
 	// decompile subfunction
 	stringstream decompiledFunction;
-	decompiledFunction << func->subFunctions[iOp.bx].decompile(func->indent);
+	decompiledFunction << sub.decompile(func->indent);
 
 	// cosmetic: write an empty line after ground level functions
 	if (func->indent == 0)
