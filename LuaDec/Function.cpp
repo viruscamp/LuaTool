@@ -28,8 +28,8 @@ lua_State* LuaState::getState()
 }
 
 // Global block constructors
-Function::Function(const char* inputName)
-: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(false)
+Function::Function(const char* inputName, bool nosub, bool functionCompare)
+: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub), functionCompare(functionCompare)
 {
 	lua_State* L = l->getState();
 	if (L == NULL)
@@ -51,14 +51,15 @@ Function::Function(const char* inputName)
 }
 
 // Subfunction constructor
-Function::Function(shared_ptr<LuaState> l, Proto *f, string number, map<int, string> upvals)
-: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(false)
+Function::Function(shared_ptr<LuaState> l, Proto *f, string number, map<int, string> upvals, bool nosub, bool functionCompare)
+: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(nosub), functionCompare(functionCompare)
 {
 	buildFromProto(f);
 }
 
 void Function::buildFromProto(Proto* f)
 {
+	proto = f;
 	indent = 0;
 	
 	// build register file
@@ -81,7 +82,7 @@ void Function::buildFromProto(Proto* f)
 			ss << funcNumber << "_" << i;
 
 			map<int, string> upvals = getUpValues(f, i);
-			subFunctions[i] = Function(l, f->p[i], ss.str(), upvals);
+			subFunctions[i] = Function(l, f->p[i], ss.str(), upvals, nosub, functionCompare);
 		}
 	}
 

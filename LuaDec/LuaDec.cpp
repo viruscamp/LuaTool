@@ -14,7 +14,7 @@ LuaDec::LuaDec(string inputFileName)
 :inputName(inputFileName)
 {}
 
-void LuaDec::decompile(string outputFileName, string functionNum, bool nosub)
+void LuaDec::decompile(string outputFileName, string functionNum, bool nosub, bool functionCompare)
 {
 	output.create(outputFileName);
 	output.addText(makeHeader());
@@ -27,7 +27,7 @@ void LuaDec::decompile(string outputFileName, string functionNum, bool nosub)
 	}
 	*/
 
-	Function luaGlobal(inputName.c_str());
+	Function luaGlobal(inputName.c_str(), nosub, functionCompare);
 	if (luaGlobal.errors.getLast() != "")
 	{
 		errors.set(luaGlobal.errors.getLast());
@@ -40,7 +40,7 @@ void LuaDec::decompile(string outputFileName, string functionNum, bool nosub)
 	{
 		Function* cf = luaGlobal.findSubFunction(functionNum);
 		//outCode = cf->getDecompiledCode();
-		outCode = cf->decompile(0, nosub);
+		outCode = cf->decompile(0);
 
 		string upvals = cf->listUpvalues();
 		if (!upvals.empty())
@@ -56,7 +56,7 @@ void LuaDec::decompile(string outputFileName, string functionNum, bool nosub)
 	}
 	else
 	{
-		outCode = luaGlobal.decompile(0, nosub);
+		outCode = luaGlobal.decompile(0);
 	}
 
 	output.addText(outCode);
@@ -87,11 +87,11 @@ void LuaDec::disassemble(string outputFileName, string functionNum, bool nosub)
 	string outCode;
 	if (functionNum != "0")
 	{
-		outCode = luaGlobal.findSubFunction(functionNum)->disassemble(nosub);
+		outCode = luaGlobal.findSubFunction(functionNum)->disassemble();
 	}
 	else
 	{
-		outCode = luaGlobal.disassemble(nosub);
+		outCode = luaGlobal.disassemble();
 	}
 
 	output.addText(outCode);

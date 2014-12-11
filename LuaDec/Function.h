@@ -43,16 +43,16 @@ class Function
 {
 // ===================== Constructors =====================
 public:
-	Function(const char* inputName); // global block constructor - from file
-	Function() : isGlobal(false), nosub(false) {}; // default constructor
+	Function(const char* inputName, bool nosub = false, bool functionCompare = false); // global block constructor - from file
+	Function() {}; // default constructor
 private:
-	Function(shared_ptr<LuaState> l, Proto* f, string number, map<int,string> upvals); // subfunction constructor
+	Function(shared_ptr<LuaState> l, Proto* f, string number, map<int,string> upvals, bool nosub = false, bool functionCompare = false); // subfunction constructor
 
 // ======================= Methods ========================
 public:
-	string disassemble(bool nosub = false);
+	string disassemble();
 	
-	string decompile(int indent = 0, bool nosub = false);
+	string decompile(int indent = 0);
 	string decompileStub(int indent = 0);
 	string getDecompiledCode() const;
 
@@ -73,6 +73,8 @@ private:
 	void addPartial(string partial, string end = ""); // add partial statement to decCode
 
 	bool assignmentsBetween(PcAddr start, PcAddr end); // are there any assignments here?
+
+	int doCompare(string& result_str);
 
 // ====================== Variables =======================
 private:
@@ -110,6 +112,8 @@ private:
 	map<int, Function> subFunctions; // map of subfunctions
 
 	bool nosub;
+	bool functionCompare;
+	Proto* proto;
 
 // ======================= Friends ========================
 public: 

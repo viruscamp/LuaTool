@@ -22,7 +22,7 @@ char getPrefix(int x)
 		return 'R';
 }
 
-string Function::disassemble(bool nosub)
+string Function::disassemble()
 {
 	stringstream ssHeader;
 	ssHeader << "; Function #" << funcNumber << ":" << endl;

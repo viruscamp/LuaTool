@@ -3,12 +3,133 @@
 #include <sstream>
 using namespace std;
 
-string Function::decompile(int funcIndent, bool nosub)
-{
-	indent = funcIndent;
+#if LUA_VERSION_NUM == 501
+	#define NUPS(f) (f->nups)
+#endif
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
-	bool nosub_saved = this->nosub;
-	this->nosub = nosub;
+Proto* toproto(lua_State* L, int i) {
+	const Closure* c=(const Closure*)lua_topointer(L,i);
+	return c->l.p;
+}
+
+int CompareProto(const Proto* fleft, const Proto* fright, string& str) {
+	int sizesame, pc, minsizecode;
+	int diff = 0;
+	stringstream ss;
+	if (fleft->numparams != fright->numparams) {
+		diff++;
+		ss << " different params size;";
+	}
+	if (NUPS(fleft) != NUPS(fright)) {
+		diff++;
+		ss << " different upvalues size;";
+	}
+	if (fleft->is_vararg != fright->is_vararg) {
+		diff++;
+		ss << " different is_vararg;";
+	}
+	if (fleft->sizecode != fright->sizecode) {
+		diff++;
+		ss << " different code size;";
+	}
+	sizesame = 0;
+	minsizecode = MIN(fleft->sizecode, fright->sizecode);
+	for (pc = 0; pc < minsizecode; pc++) {
+		Instruction ileft = fleft->code[pc];
+		Instruction iright = fright->code[pc];
+		if (ileft == iright) {
+			sizesame++;
+		} else {
+			OpCode opleft = GET_OPCODE(ileft);
+			int aleft = GETARG_A(ileft);
+			int bleft = GETARG_B(ileft);
+			int cleft = GETARG_C(ileft);
+			int bcleft = GETARG_Bx(ileft);
+			int sbcleft = GETARG_sBx(ileft);
+			OpCode opright = GET_OPCODE(iright);
+			int aright = GETARG_A(iright);
+			int bright = GETARG_B(iright);
+			int cright = GETARG_C(iright);
+			int bcright = GETARG_Bx(iright);
+			int sbcright = GETARG_sBx(iright);
+
+			if (opleft == opright) {
+				if (opleft == OP_EQ && aleft == aright &&
+					bleft == cright && cleft == bright) {
+					sizesame++;
+				}
+			} else if ((opleft == OP_LT && opright == OP_LE) ||
+				(opleft == OP_LE && opright == OP_LT)) {
+				if (aleft == !aright &&	bleft == cright && cleft == bright) {
+					sizesame++;
+				}
+			}
+		}
+	}
+	if (sizesame != fleft->sizecode) {
+		diff++;
+		ss << " sizecode org: "<< fleft->sizecode
+			<< ", decompiled: "<< fright->sizecode
+			<< ", same: "<< sizesame
+			<< ";";
+	}
+	str = ss.str();
+	return diff;
+}
+
+int Function::doCompare(string& result_str) {
+	stringstream ss;
+	string decompiled = decompile(0);
+	if (!isGlobal) {
+		stringstream ss;
+		string upvals = listUpvalues();
+		if (!upvals.empty())
+		{
+			ss << "local " << upvals << ";\n";
+		}
+		ss << "DecompiledFunction_" << funcNumber << "=" << decompiled;
+		decompiled = ss.str();
+	}
+	lua_State* newState = lua_open();
+	int check_result;
+	if (luaL_loadstring(newState, decompiled.c_str()) != 0) {
+		check_result = -1;
+		ss << "-- function check fail " << funcNumber << " : cannot compile";
+	} else {
+		Proto* newProto = toproto(newState, -1);;
+		if (!isGlobal) {
+			newProto = newProto->p[0];
+		}
+		string compare_result_str;
+		check_result = CompareProto(proto, newProto, compare_result_str);
+		if (check_result == 0) {
+			ss << "-- function check pass " << funcNumber;
+		} else {
+			ss << "-- function check fail "<< funcNumber << " : " << compare_result_str;
+		}
+	}
+
+	lua_close(newState);
+	result_str = ss.str();
+	return check_result;
+}
+
+string Function::decompile(int funcIndent)
+{
+	string compare_result_str;
+	if (functionCompare)
+	{
+		Function newf(l,proto,this->funcNumber,upvalues,true,false);
+		if (isGlobal)
+		{
+			newf.isGlobal = true;
+		}
+		newf.doCompare(compare_result_str);
+	}
+
+	indent = funcIndent;
 
 	// the decompile is done in multiple passes
 	// this order of the passes is strict
@@ -20,6 +141,11 @@ string Function::decompile(int funcIndent, bool nosub)
 
 	// print function header
 	generateHeader();
+
+	if (functionCompare)
+	{
+		addStatement(compare_result_str);
+	}
 
 	// locals declared at pc == 0 can interfere with some block starts
 	// this is a workaround
@@ -50,8 +176,6 @@ string Function::decompile(int funcIndent, bool nosub)
 		indent--;
 		addPartial("end");
 	}
-
-	this->nosub = nosub_saved;
 
 	return decCode;
 }
@@ -156,8 +280,11 @@ string Function::decompileStub(int funcIndent)
 		addStatement(ss.str());
 	}
 
-	indent--;
-	addPartial("end");
+	if (!isGlobal)
+	{
+		indent--;
+		addPartial("end");
+	}
 
 	return decCode;
 }

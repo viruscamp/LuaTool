@@ -18,7 +18,8 @@ void printLuaDecUsage(string message)
  		"  -dis            don't decompile, just disassemble\n"
  		"  -pf             print all function number\n"
  		"  -f <number>     decompile/disassemble only function number (0 = global block)\n"
- 		"  -ns             donot print sub functions\n";
+ 		"  -ns             donot print sub functions\n"
+		"  -fc             compare protos of original and decompiled functions\n";
 }
 
 int main(int argn, char* argv[])
@@ -30,6 +31,7 @@ int main(int argn, char* argv[])
 	bool isDisassemble = false;
 	bool isPrintFuncStructure = false;
 	bool nosub = false;
+	bool functionCompare = false;
 	string functionNum = "0";
 	string inputName = "";
 	string outputName = "";
@@ -63,6 +65,11 @@ int main(int argn, char* argv[])
 		else if (args[i] == "-ns")
 		{
 			nosub = true;
+			numOptions +=1;
+		}
+		else if (args[i] == "-fc")
+		{
+			functionCompare = true;
 			numOptions +=1;
 		}
 	}
@@ -103,7 +110,7 @@ int main(int argn, char* argv[])
 	}
 	else
 	{
-		ld.decompile(outputName, functionNum, nosub);
+		ld.decompile(outputName, functionNum, nosub, functionCompare);
 		if (ld.errors.getLast() != "")
 		{
 			cout << ld.errors.getLast() << endl;

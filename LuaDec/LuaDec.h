@@ -20,7 +20,7 @@ class LuaDec
 public:
 	LuaDec(string inputFileName); // decompile from file
 
-	void decompile(string outputFileName, string functionNum = "0", bool nosub = false);
+	void decompile(string outputFileName, string functionNum = "0", bool nosub = false, bool functionCompare = false);
 	void disassemble(string outputFileName, string functionNum = "0", bool nosub = false);
 	TextFile disassembleForCompare(); // used to directly pass the dissasembly to LuaCompare instead of writing to disk 
 
