@@ -16,8 +16,9 @@ void printLuaDecUsage(string message)
  		"  Available Options:\n"
  		"  -o <filename>   specify output file name\n"
  		"  -dis            don't decompile, just disassemble\n"
- 		"  -pf             print all function number\n";
- 		"  -f <number>     decompile/disassemble only function number (0 = global block)\n";
+ 		"  -pf             print all function number\n"
+ 		"  -f <number>     decompile/disassemble only function number (0 = global block)\n"
+ 		"  -ns             donot print sub functions\n";
 }
 
 int main(int argn, char* argv[])
@@ -28,6 +29,7 @@ int main(int argn, char* argv[])
 
 	bool isDisassemble = false;
 	bool isPrintFuncStructure = false;
+	bool nosub = false;
 	string functionNum = "0";
 	string inputName = "";
 	string outputName = "";
@@ -58,6 +60,11 @@ int main(int argn, char* argv[])
 			isPrintFuncStructure = true;
 			numOptions +=1;
 		}
+		else if (args[i] == "-ns")
+		{
+			nosub = true;
+			numOptions +=1;
+		}
 	}
 	// check if options were valid
 	if (numOptions != args.size() - 2) {
@@ -86,7 +93,7 @@ int main(int argn, char* argv[])
 	}
 	else if (isDisassemble)
 	{
-		ld.disassemble(outputName, functionNum);
+		ld.disassemble(outputName, functionNum, nosub);
 		if (ld.errors.getLast() != "")
 		{
 			cout << ld.errors.getLast() << endl;
@@ -96,7 +103,7 @@ int main(int argn, char* argv[])
 	}
 	else
 	{
-		ld.decompile(outputName, functionNum);
+		ld.decompile(outputName, functionNum, nosub);
 		if (ld.errors.getLast() != "")
 		{
 			cout << ld.errors.getLast() << endl;

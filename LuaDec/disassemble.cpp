@@ -22,7 +22,7 @@ char getPrefix(int x)
 		return 'R';
 }
 
-string Function::disassemble()
+string Function::disassemble(bool nosub)
 {
 	stringstream ssHeader;
 	ssHeader << "; Function #" << funcNumber << ":" << endl;
@@ -357,7 +357,7 @@ string Function::disassemble()
 		addDisLine(" ");
 	addDisLine(" ");
 
-	if (subFunctions.empty() != true)
+	if (!nosub && subFunctions.empty() != true)
 	{	
 		for (unsigned int i=0; i < subFunctions.size(); i++) {
 			addDisLine(subFunctions[i].disassemble());

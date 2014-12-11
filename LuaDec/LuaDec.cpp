@@ -14,7 +14,7 @@ LuaDec::LuaDec(string inputFileName)
 :inputName(inputFileName)
 {}
 
-void LuaDec::decompile(string outputFileName, string functionNum)
+void LuaDec::decompile(string outputFileName, string functionNum, bool nosub)
 {
 	output.create(outputFileName);
 	output.addText(makeHeader());
@@ -40,7 +40,7 @@ void LuaDec::decompile(string outputFileName, string functionNum)
 	{
 		Function* cf = luaGlobal.findSubFunction(functionNum);
 		//outCode = cf->getDecompiledCode();
-		outCode = cf->decompile();
+		outCode = cf->decompile(0, nosub);
 
 		string upvals = cf->listUpvalues();
 		if (!upvals.empty())
@@ -56,14 +56,14 @@ void LuaDec::decompile(string outputFileName, string functionNum)
 	}
 	else
 	{
-		outCode = luaGlobal.decompile();
+		outCode = luaGlobal.decompile(0, nosub);
 	}
 
 	output.addText(outCode);
 	output.write();
 }
 
-void LuaDec::disassemble(string outputFileName, string functionNum)
+void LuaDec::disassemble(string outputFileName, string functionNum, bool nosub)
 {
 	output.create(outputFileName);
 	output.addText(makeHeader(true));
@@ -87,11 +87,11 @@ void LuaDec::disassemble(string outputFileName, string functionNum)
 	string outCode;
 	if (functionNum != "0")
 	{
-		outCode = luaGlobal.findSubFunction(functionNum)->disassemble();
+		outCode = luaGlobal.findSubFunction(functionNum)->disassemble(nosub);
 	}
 	else
 	{
-		outCode = luaGlobal.disassemble();
+		outCode = luaGlobal.disassemble(nosub);
 	}
 
 	output.addText(outCode);

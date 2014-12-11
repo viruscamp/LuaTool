@@ -50,7 +50,7 @@ private:
 
 // ======================= Methods ========================
 public:
-	string disassemble();
+	string disassemble(bool nosub = false);
 	
 	string decompile(int indent = 0, bool nosub = false);
 	string decompileStub(int indent = 0);
