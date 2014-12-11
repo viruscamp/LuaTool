@@ -24,7 +24,20 @@ extern "C" {
 #include <map>
 #include <list>
 #include <vector>
+#include <memory>
 using namespace std;
+using namespace std::tr1;
+
+class LuaState
+{
+public:
+	LuaState();
+	~LuaState();
+
+	lua_State* getState();
+private:
+	lua_State* L;
+};
 
 class Function
 {
@@ -33,7 +46,7 @@ public:
 	Function(const char* inputName); // global block constructor - from file
 	Function() : isGlobal(false), nosub(false) {}; // default constructor
 private:
-	Function(Proto* f, string number, map<int,string> upvals); // subfunction constructor
+	Function(shared_ptr<LuaState> l, Proto* f, string number, map<int,string> upvals); // subfunction constructor
 
 // ======================= Methods ========================
 public:
@@ -63,6 +76,8 @@ private:
 
 // ====================== Variables =======================
 private:
+	shared_ptr<LuaState> l;
+
 	bool isGlobal; // indicates if this is the global function
 
 	string decCode; // decompiled code

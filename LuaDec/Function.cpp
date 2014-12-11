@@ -3,13 +3,35 @@
 #include <sstream>
 using namespace std;
 
-// Global block constructors
-Function::Function(const char* inputName)
-: codeSize(0), funcNumber("0"), isGlobal(true), nosub(false)
+LuaState::LuaState()
 {
 	// open lua state
-	lua_State* L;
 	L = lua_open();
+	if (L == NULL)
+	{
+		// TODO: error handler
+		return; // that's bad
+	}
+}
+
+LuaState::~LuaState()
+{
+	if (L)
+	{
+		lua_close(L);
+	}
+}
+
+lua_State* LuaState::getState()
+{
+	return L;
+}
+
+// Global block constructors
+Function::Function(const char* inputName)
+: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(false)
+{
+	lua_State* L = l->getState();
 	if (L == NULL)
 		return; // that's bad
 
@@ -26,14 +48,11 @@ Function::Function(const char* inputName)
 
 	// build function
 	buildFromProto(f);
-
-	// close
-	lua_close(L);
 }
 
 // Subfunction constructor
-Function::Function(Proto *f, string number, map<int, string> upvals)
-: funcNumber(number), isGlobal(false), upvalues(upvals), nosub(false)
+Function::Function(shared_ptr<LuaState> l, Proto *f, string number, map<int, string> upvals)
+: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(false)
 {
 	buildFromProto(f);
 }
@@ -62,7 +81,7 @@ void Function::buildFromProto(Proto* f)
 			ss << funcNumber << "_" << i;
 
 			map<int, string> upvals = getUpValues(f, i);
-			subFunctions[i] = Function(f->p[i], ss.str(), upvals);
+			subFunctions[i] = Function(l, f->p[i], ss.str(), upvals);
 		}
 	}
 
