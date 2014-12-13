@@ -13,12 +13,12 @@ void printLuaDecUsage(string message)
 
 	cout << "LuaDec " << LuaDec::version << "\n"
 		"  Usage: LuaTool /decompile [options] <inputfile>\n"
- 		"  Available Options:\n"
- 		"  -o <filename>   specify output file name\n"
- 		"  -dis            don't decompile, just disassemble\n"
- 		"  -pf             print all function number\n"
- 		"  -f <number>     decompile/disassemble only function number (0 = global block)\n"
- 		"  -ns             donot print sub functions\n"
+		"  Available Options:\n"
+		"  -o <filename>   specify output file name\n"
+		"  -dis            don't decompile, just disassemble\n"
+		"  -pf             print all function number\n"
+		"  -f <number>     decompile/disassemble only function number (0 = global block)\n"
+		"  -ns             donot print sub functions\n"
 		"  -fc             compare protos of original and decompiled functions\n";
 }
 
@@ -121,7 +121,7 @@ int main(int argn, char* argv[])
 
 #ifdef _DEBUG
 	cout << endl;
-	system("PAUSE");
+	//system("PAUSE");
 #endif
 
 	return 0;

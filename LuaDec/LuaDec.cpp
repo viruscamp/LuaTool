@@ -19,6 +19,13 @@ void LuaDec::decompile(string outputFileName, string functionNum, bool nosub, bo
 	output.create(outputFileName);
 	output.addText(makeHeader());
 
+	if (functionCompare)
+	{
+		stringstream ss;
+		ss << "-- function check Command line: -fc " << inputName;
+		output.addText(ss.str());
+	}
+
 	/*
 	if (ManilaFile::detectManilaType(inputName) != ManilaFile::LUAC)
 	{
