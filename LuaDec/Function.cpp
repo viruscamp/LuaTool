@@ -27,9 +27,14 @@ lua_State* LuaState::getState()
 	return L;
 }
 
+// default constructor
+Function::Function()
+{
+}
+
 // Global block constructors
 Function::Function(const char* inputName, bool nosub, bool functionCompare)
-: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub), functionCompare(functionCompare)
+: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub)
 {
 	lua_State* L = l->getState();
 	if (L == NULL)
@@ -48,11 +53,51 @@ Function::Function(const char* inputName, bool nosub, bool functionCompare)
 
 	// build function
 	buildFromProto(f);
+
+	if (functionCompare)
+	{
+		makeShadow();
+	}
+}
+
+Function::~Function()
+{
+	if (isGlobal && shadow)
+	{
+		delete shadow;
+	}
+}
+
+void mapShadow(Function* org, Function* shadow)
+{
+	org->shadow = shadow;
+	for (int i = 0; i < org->subFunctions.size(); i++)
+	{
+		mapShadow(&(org->subFunctions[i]), &(shadow->subFunctions[i]));
+	}
+
+}
+
+void Function::makeShadow()
+{	
+	map<int, string> upvals;
+	shadow = new Function();
+	shadow->l = l;
+	shadow->isGlobal = isGlobal;
+	shadow->proto = proto;
+	shadow->funcNumber = funcNumber;
+	shadow->upvalues = upvals;
+	shadow->nosub = true;
+	shadow->shadow = NULL;
+
+	shadow->buildFromProto(proto);
+
+	mapShadow(this, shadow);
 }
 
 // Subfunction constructor
-Function::Function(shared_ptr<LuaState> l, Proto *f, string number, map<int, string> upvals, bool nosub, bool functionCompare)
-: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(nosub), functionCompare(functionCompare)
+Function::Function(shared_ptr<LuaState> l, Proto *f, string number, map<int, string> upvals, bool nosub)
+: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(nosub)
 {
 	buildFromProto(f);
 }
@@ -82,7 +127,7 @@ void Function::buildFromProto(Proto* f)
 			ss << funcNumber << "_" << i;
 
 			map<int, string> upvals = getUpValues(f, i);
-			subFunctions[i] = Function(l, f->p[i], ss.str(), upvals, nosub, functionCompare);
+			subFunctions[i] = Function(l, f->p[i], ss.str(), upvals, nosub);
 		}
 	}
 
@@ -278,12 +323,12 @@ string Function::listUpvalues()
 
 	stringstream ss;
 	map<int, string>::iterator it;
-    for (it = upvalues.begin(); it != upvalues.end(); it++)
-    {
+	for (it = upvalues.begin(); it != upvalues.end(); it++)
+	{
 		if (it != upvalues.begin())
 			ss << ", ";
-        ss << it->second;
-    }
+		ss << it->second;
+	}
 
 	return ss.str();
 }

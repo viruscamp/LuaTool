@@ -119,14 +119,9 @@ int Function::doCompare(string& result_str) {
 string Function::decompile(int funcIndent)
 {
 	string compare_result_str;
-	if (functionCompare)
+	if (shadow)
 	{
-		Function newf(l,proto,this->funcNumber,upvalues,true,false);
-		if (isGlobal)
-		{
-			newf.isGlobal = true;
-		}
-		newf.doCompare(compare_result_str);
+		shadow->doCompare(compare_result_str);
 	}
 
 	indent = funcIndent;
@@ -142,7 +137,7 @@ string Function::decompile(int funcIndent)
 	// print function header
 	generateHeader();
 
-	if (functionCompare)
+	if (shadow)
 	{
 		addStatement(compare_result_str);
 	}
@@ -198,8 +193,8 @@ void Function::generateHeader()
 	} 
 	else 
 	{
-      if (isVarArg2)
-		  ss << "...";
+		if (isVarArg2)
+			ss << "...";
 	}
 	ss << ")";
 
@@ -261,7 +256,7 @@ void Function::startOrEndBlock(const PcAddr pc)
 	}
 
 	// start if
- 	if (ifBlocks.isStart(pc))
+	if (ifBlocks.isStart(pc))
 	{
 		addStatement("if " + ifBlocks.getIfStatement(pc) + " then");
 		indent++;

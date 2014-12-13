@@ -44,9 +44,10 @@ class Function
 // ===================== Constructors =====================
 public:
 	Function(const char* inputName, bool nosub = false, bool functionCompare = false); // global block constructor - from file
-	Function() {}; // default constructor
+	Function(); // default constructor
+	~Function();
 private:
-	Function(shared_ptr<LuaState> l, Proto* f, string number, map<int,string> upvals, bool nosub = false, bool functionCompare = false); // subfunction constructor
+	Function(shared_ptr<LuaState> l, Proto* f, string number, map<int,string> upvals, bool nosub = false); // subfunction constructor
 
 // ======================= Methods ========================
 public:
@@ -74,7 +75,9 @@ private:
 
 	bool assignmentsBetween(PcAddr start, PcAddr end); // are there any assignments here?
 
+	void makeShadow();
 	int doCompare(string& result_str);
+	friend void mapShadow(Function* org, Function* shadow);
 
 // ====================== Variables =======================
 private:
@@ -112,8 +115,8 @@ private:
 	map<int, Function> subFunctions; // map of subfunctions
 
 	bool nosub;
-	bool functionCompare;
 	Proto* proto;
+	Function* shadow = NULL;
 
 // ======================= Friends ========================
 public: 
