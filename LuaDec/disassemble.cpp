@@ -360,7 +360,7 @@ string Function::disassemble()
 	if (!nosub && subFunctions.empty() != true)
 	{	
 		for (unsigned int i=0; i < subFunctions.size(); i++) {
-			addDisLine(subFunctions[i].disassemble());
+			addDisLine(subFunctions[i]->disassemble());
 		}
 	}
 

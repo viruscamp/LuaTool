@@ -1,5 +1,6 @@
 #include "Function.h"
 
+#include <iostream>
 #include <sstream>
 using namespace std;
 
@@ -28,14 +29,16 @@ lua_State* LuaState::getState()
 }
 
 // default constructor
-Function::Function()
+Function::Function(): shadow(NULL)
 {
+	//cerr << "default constructor\n";
 }
 
 // Global block constructors
 Function::Function(const char* inputName, bool nosub, bool functionCompare)
 : l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub)
 {
+	//cerr << "Global block constructors\n";
 	lua_State* L = l->getState();
 	if (L == NULL)
 		return; // that's bad
@@ -54,16 +57,20 @@ Function::Function(const char* inputName, bool nosub, bool functionCompare)
 	// build function
 	buildFromProto(f);
 
+	shadow = NULL;
 	if (functionCompare)
 	{
+		//cerr << "start makeShadow\n";
 		makeShadow();
 	}
 }
 
 Function::~Function()
 {
+	//cerr << "desctructor " << funcNumber << endl;
 	if (isGlobal && shadow)
 	{
+		//cerr << "start shadow desctructor\n";
 		delete shadow;
 	}
 }
@@ -73,20 +80,17 @@ void mapShadow(Function* org, Function* shadow)
 	org->shadow = shadow;
 	for (int i = 0; i < org->subFunctions.size(); i++)
 	{
-		mapShadow(&(org->subFunctions[i]), &(shadow->subFunctions[i]));
+		mapShadow(org->subFunctions[i].get(), shadow->subFunctions[i].get());
 	}
-
 }
 
 void Function::makeShadow()
 {	
-	map<int, string> upvals;
 	shadow = new Function();
 	shadow->l = l;
 	shadow->isGlobal = isGlobal;
 	shadow->proto = proto;
 	shadow->funcNumber = funcNumber;
-	shadow->upvalues = upvals;
 	shadow->nosub = true;
 	shadow->shadow = NULL;
 
@@ -96,14 +100,19 @@ void Function::makeShadow()
 }
 
 // Subfunction constructor
-Function::Function(shared_ptr<LuaState> l, Proto *f, string number, map<int, string> upvals, bool nosub)
+Function::Function(shared_ptr<LuaState> l, Proto *f, string number, vector<string> upvals, bool nosub)
 : l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(nosub)
 {
+	//cerr << "Subfunction constructor " << number << endl;
+	shadow = NULL;
 	buildFromProto(f);
 }
 
 void Function::buildFromProto(Proto* f)
 {
+	opMap.resize(f->sizecode);
+	subFunctions.resize(f->sizep);
+
 	proto = f;
 	indent = 0;
 	
@@ -126,8 +135,8 @@ void Function::buildFromProto(Proto* f)
 			stringstream ss;
 			ss << funcNumber << "_" << i;
 
-			map<int, string> upvals = getUpValues(f, i);
-			subFunctions[i] = Function(l, f->p[i], ss.str(), upvals, nosub);
+			vector<string> upvals = getUpValues(f, i);
+			subFunctions[i] = shared_ptr<Function>(new Function(l, f->p[i], ss.str(), upvals, nosub));
 		}
 	}
 
@@ -222,10 +231,8 @@ void Function::addPartial(string start, string end)
 	endOfLine = end;
 }
 
-map<int, string> Function::getUpValues(Proto* f, int numFunc)
+vector<string> Function::getUpValues(Proto* f, int numFunc)
 {
-	map<int, string> upvals;
-
 	for(PcAddr pc = 0; pc < codeSize; pc++)
 	{
 		Op iOp = opMap[pc];
@@ -235,6 +242,7 @@ map<int, string> Function::getUpValues(Proto* f, int numFunc)
 		// upvalues are defined after the function closure
 
 		int uvn = f->p[iOp.bx]->nups;
+		vector<string> upvals(uvn);
 
 		for (int i=0; i<uvn; i++)
 		{
@@ -256,9 +264,10 @@ map<int, string> Function::getUpValues(Proto* f, int numFunc)
 				upvals[i] = ss.str();
 			}
 		} // end inner for
-	} // end outer for
 
-	return upvals;
+		return upvals;
+	} // end outer for
+	return vector<string>();
 }
 
 bool Function::assignmentsBetween(PcAddr start, PcAddr end)
@@ -274,7 +283,7 @@ bool Function::assignmentsBetween(PcAddr start, PcAddr end)
 Function* Function::getSubfunction(unsigned i)
 { 
 	if (i < subFunctions.size())
-		return &subFunctions[i];
+		return subFunctions[i].get();
 	else
 		return this;
 }
@@ -307,7 +316,7 @@ Function* Function::findSubFunction(const string funcnumstr) {
 		if (c < 0 || c >= cf->subFunctions.size()) {
 			return NULL;
 		}
-		cf = &(cf->subFunctions[c]);
+		cf = cf->subFunctions[c].get();
 		endstr = strchr(startstr, '_');
 		startstr = endstr + 1;
 		realfuncnumstr << "_" << c;
@@ -322,12 +331,12 @@ string Function::listUpvalues()
 		return string("");
 
 	stringstream ss;
-	map<int, string>::iterator it;
-	for (it = upvalues.begin(); it != upvalues.end(); it++)
+
+	for (int i=0; i<upvalues.size(); i++)
 	{
-		if (it != upvalues.begin())
-			ss << ", ";
-		ss << it->second;
+		if (i != 0)
+			ss <<", ";
+		ss << upvalues[i];
 	}
 
 	return ss.str();

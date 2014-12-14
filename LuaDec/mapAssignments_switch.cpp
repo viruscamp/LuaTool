@@ -366,7 +366,7 @@ void Assignments::opReturn()
 
 void Assignments::opClosure()
 {
-	Function sub = func->subFunctions[iOp.bx];
+	Function& sub = *(func->subFunctions[iOp.bx]);
 	// cosmetic: write an empty line before first function
 	if (sub.funcNumber == "0_0")
 		add(" ");
@@ -402,7 +402,7 @@ void Assignments::opClosure()
 
 	assign(func->reg[iOp.a], decompiledFunction.str());
 	
-	pc += func->subFunctions[iOp.bx].upvalues.size(); // ignore the following upvalues
+	pc += func->subFunctions[iOp.bx]->upvalues.size(); // ignore the following upvalues
 }
 
 void Assignments::opCompare()

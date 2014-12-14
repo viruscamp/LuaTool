@@ -248,7 +248,7 @@ void Locals::mapLocals()
 			continue;
 		// upvalues are defined after the function closure
 
-		int uvn = func->subFunctions[tOp.bx].upvalues.size();
+		int uvn = func->subFunctions[tOp.bx]->upvalues.size();
 
 		for (int i=0; i<uvn; i++)
 		{

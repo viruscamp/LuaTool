@@ -47,7 +47,7 @@ public:
 	Function(); // default constructor
 	~Function();
 private:
-	Function(shared_ptr<LuaState> l, Proto* f, string number, map<int,string> upvals, bool nosub = false); // subfunction constructor
+	Function(shared_ptr<LuaState> l, Proto* f, string number, vector<string> upvals, bool nosub = false); // subfunction constructor
 
 // ======================= Methods ========================
 public:
@@ -64,7 +64,7 @@ public:
 	string listUpvalues();
 private:
 	void buildFromProto(Proto* f); // build function from proto
-	map<int, string> getUpValues(Proto* f, int numFunc); // gets upvalues for subfunctions
+	vector<string> getUpValues(Proto* f, int numFunc); // gets upvalues for subfunctions
 
 	void generateHeader(); // generates function header
 	void startOrEndBlock(const PcAddr pc); // generate (if or loop) block start or end
@@ -94,7 +94,7 @@ private:
 	LoopBlocks loopBlocks; // maps loop blocks
 	IfBlocks ifBlocks; // maps if statements
 	RegisterFile reg; // keeps the current register state as well as constants
-	map<int, string> upvalues; // map of upvalues
+	vector<string> upvalues; // map of upvalues
 
 	map<PcAddr, string> decErrors; // holds errors encountered while decompiling
 
@@ -111,12 +111,12 @@ private:
 	bool isVarArg2; // variable arguments 2
 
 	int codeSize; // total number of opcodes
-	map<PcAddr, Op> opMap; // all function ops, mapped by program counter
-	map<int, Function> subFunctions; // map of subfunctions
+	vector<Op> opMap; // all function ops, mapped by program counter
+	vector<shared_ptr<Function>> subFunctions; // map of subfunctions
 
 	bool nosub;
 	Proto* proto;
-	Function* shadow = NULL;
+	Function* shadow;
 
 // ======================= Friends ========================
 public: 
