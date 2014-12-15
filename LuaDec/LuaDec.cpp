@@ -34,7 +34,7 @@ void LuaDec::decompile(string outputFileName, string functionNum, bool nosub, bo
 	}
 	*/
 
-	Function luaGlobal(inputName.c_str(), nosub, functionCompare);
+	Function luaGlobal(inputName, nosub, functionCompare);
 	if (luaGlobal.errors.getLast() != "")
 	{
 		errors.set(luaGlobal.errors.getLast());

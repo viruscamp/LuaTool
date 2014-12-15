@@ -35,7 +35,7 @@ Function::Function(): shadow(NULL)
 }
 
 // Global block constructors
-Function::Function(const char* inputName, bool nosub, bool functionCompare)
+Function::Function(string inputName, bool nosub, bool functionCompare)
 : l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub)
 {
 	//cerr << "Global block constructors\n";
@@ -44,7 +44,7 @@ Function::Function(const char* inputName, bool nosub, bool functionCompare)
 		return; // that's bad
 
 	// load file
-	if (luaL_loadfile(L, inputName) != 0)
+	if (luaL_loadfile(L, inputName.c_str()) != 0)
 	{
 		errors.set("LuaDec: " + string(lua_tostring(L,-1)));
 		return;

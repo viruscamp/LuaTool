@@ -43,7 +43,7 @@ class Function
 {
 // ===================== Constructors =====================
 public:
-	Function(const char* inputName, bool nosub = false, bool functionCompare = false); // global block constructor - from file
+	Function(string inputName, bool nosub = false, bool functionCompare = false); // global block constructor - from file
 	Function(); // default constructor
 	~Function();
 private:
