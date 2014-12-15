@@ -11,7 +11,7 @@ using namespace std;
 #define invopstr(o) ((o)==OP_EQ?"~=":(o)==OP_LE?">=":(o)==OP_LT?">":(((o)==OP_TEST)||((o)==OP_TESTSET))?"not":"?")
 
 char* operators[22] =
-    { " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
+	{ " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
 	"+", "-", "*", "/", "%", "^", "-", "not ", "#", ".." };
 
 char getPrefix(int x)
@@ -57,7 +57,7 @@ string Function::disassemble()
 		stringstream line, lend;
 
 		switch (op.opCode) {
-	      case OP_MOVE:
+		  case OP_MOVE:
 			  line << aPrefix << op.a << " " << bPrefix << op.b;
 			  lend << aPrefix << op.a << " := " << bPrefix << op.b;
 			 break;
@@ -345,7 +345,7 @@ string Function::disassemble()
 			  break;
 		  default:
 			  break;
-      }// end switch
+	  }// end switch
 	  stringstream ssLine;
 	  ssLine << setw(3) << pc << " [-]: " << left << setw(10) << luaP_opnames[op.opCode]; 
 	  ssLine << left << setw(13) << line.str() << "; " << lend.str();

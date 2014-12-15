@@ -84,7 +84,7 @@ void LuaDec::disassemble(string outputFileName, string functionNum, bool nosub)
 	}
 	*/
 
-	Function luaGlobal(inputName.c_str());
+	Function luaGlobal(inputName.c_str(), nosub);
 	if (luaGlobal.errors.getLast() != "")
 	{
 		errors.set(luaGlobal.errors.getLast());
