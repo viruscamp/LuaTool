@@ -80,6 +80,12 @@ int CompareProto(const Proto* fleft, const Proto* fright, string& str) {
 }
 
 int Function::doCompare(string& result_str) {
+	if (shadow)
+	{
+		result_str = "";
+		return 0;
+	}
+	this->decCode = "";
 	stringstream ss;
 	string decompiled = decompile(0);
 	if (!isGlobal) {
