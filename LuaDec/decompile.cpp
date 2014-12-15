@@ -85,8 +85,6 @@ int Function::doCompare(string& result_str) {
 		result_str = "";
 		return 0;
 	}
-	this->decCode = "";
-	stringstream ss;
 	string decompiled = decompile(0);
 	if (!isGlobal) {
 		stringstream ss;
@@ -100,6 +98,7 @@ int Function::doCompare(string& result_str) {
 	}
 	lua_State* newState = lua_open();
 	int check_result;
+	stringstream ss;
 	if (luaL_loadstring(newState, decompiled.c_str()) != 0) {
 		check_result = -1;
 		ss << "-- function check fail " << funcNumber << " : cannot compile";
@@ -287,5 +286,9 @@ string Function::decompileStub(int funcIndent)
 		addPartial("end");
 	}
 
-	return decCode;
+	string ret = decCode;
+
+	decCode.clear();
+
+	return ret;
 }
