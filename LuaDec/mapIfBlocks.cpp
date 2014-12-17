@@ -25,7 +25,7 @@ void IfBlocks::map(Function* func)
 		// ========================================
 		// find the base if, else and end addresses
 		startPC = pc;
-		if(func->opMap[destPC-1].opCode == OP_JMP && !func->opMap[destPC-2].isTest() 
+		if(destPC > 0 && func->opMap[destPC-1].opCode == OP_JMP && !func->opMap[destPC-2].isTest() 
 			&& func->loopBlocks.getBreak(destPC-1) == "" && func->loopBlocks.peekEnd(destPC-1) == "")
 		{ // matching else
 			elsePC = destPC - 1;

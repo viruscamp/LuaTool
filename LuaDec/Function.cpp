@@ -36,7 +36,7 @@ Function::Function(): shadow(NULL)
 
 // Global block constructors
 Function::Function(string inputName, bool nosub, bool functionCompare)
-: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub)
+: l(new LuaState()), codeSize(0), funcNumber("0"), isGlobal(true), nosub(nosub), shadow(NULL)
 {
 	//cerr << "Global block constructors\n";
 	lua_State* L = l->getState();
@@ -57,7 +57,6 @@ Function::Function(string inputName, bool nosub, bool functionCompare)
 	// build function
 	buildFromProto(f);
 
-	shadow = NULL;
 	if (functionCompare)
 	{
 		//cerr << "start makeShadow\n";
@@ -101,10 +100,9 @@ void Function::makeShadow()
 
 // Subfunction constructor
 Function::Function(shared_ptr<LuaState> l, Proto *f, string number, vector<string> upvals, bool nosub)
-: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(nosub)
+: l(l), funcNumber(number), isGlobal(false), upvalues(upvals), nosub(nosub), shadow(NULL)
 {
 	//cerr << "Subfunction constructor " << number << endl;
-	shadow = NULL;
 	buildFromProto(f);
 }
 

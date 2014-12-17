@@ -334,7 +334,7 @@ void Assignments::opCall()
 
 void Assignments::opReturn()
 {
-	if (func->opMap[pc-1].opCode == OP_TAILCALL)
+	if (pc > 0 && func->opMap[pc-1].opCode == OP_TAILCALL)
 		return; // tailcall already handles the return
 	if (pc == func->codeSize - 1)
 		return; // last return -> end function
@@ -407,7 +407,8 @@ void Assignments::opClosure()
 
 void Assignments::opCompare()
 {
-	PcAddr dest = func->opMap[pc+1].sbx + pc+1;
+	PcAddr jmpAddr = pc+1;
+	PcAddr dest = func->opMap[jmpAddr].sbx + jmpAddr + 1;
 
 	//if (func->opMap[pc+2].opCode == OP_LOADBOOL && func->opMap[pc+2].c == 1)
 	if (func->opMap[dest].opCode == OP_LOADBOOL && func->opMap[dest].c == 1)

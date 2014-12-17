@@ -319,12 +319,14 @@ void Locals::opReturn()
 	else if (iOp.b >= 2)
 		loadReg(iOp.a, iOp.a+iOp.b-2);
 
-	// local declare before return
-	if (func->opMap[pc-1].opCode == OP_CALL && iOp.b == 2 && iOp.a == func->opMap[pc-1].a)
-		forceDeclare(iOp.a, iOp.a);
+	if (pc > 0) {
+		// local declare before return
+		if (func->opMap[pc-1].opCode == OP_CALL && iOp.b == 2 && iOp.a == func->opMap[pc-1].a)
+			forceDeclare(iOp.a, iOp.a);
 
-	if (useInfo[pc-1].setReg != iOp.a && iOp.b == 2)
-		forceDeclare(iOp.a, iOp.a);
+		if (useInfo[pc-1].setReg != iOp.a && iOp.b == 2)
+			forceDeclare(iOp.a, iOp.a);
+	}
 }
 
 void Locals::opClosure()

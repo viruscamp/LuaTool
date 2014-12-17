@@ -92,7 +92,7 @@ string RegisterFile::DecriptString(Proto* f, int n)
 {
 	const char *s = svalue(&f->k[n]);
     int len = (&(&f->k[n])->value.gc->ts)->tsv.len;
-    char *ret = (char*)malloc(strlen(s) * 4 + 3);
+    char *ret = (char*)malloc(len * 4 + 3);
 	int p = 0;
     ret[p++] = '"';
     for (int i = 0; i < len; i++, s++) {

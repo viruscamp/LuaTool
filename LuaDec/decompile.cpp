@@ -272,6 +272,8 @@ string Function::decompileStub(int funcIndent)
 {
 	indent = funcIndent;
 
+	locals.mapFunction(this); // map local declarations
+
 	generateHeader();
 
 	if (this->upvalues.size() > 0) {
