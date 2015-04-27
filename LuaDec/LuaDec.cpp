@@ -42,24 +42,30 @@ void LuaDec::decompile(string outputFileName, string functionNum, bool nosub, bo
 	}
 
 	string outCode;
-	//outCode = luaGlobal.decompile();
 	if (functionNum != "0")
 	{
 		Function* cf = luaGlobal.findSubFunction(functionNum);
-		//outCode = cf->getDecompiledCode();
-		outCode = cf->decompile(0);
-
-		string upvals = cf->listUpvalues();
-		if (!upvals.empty())
+		if (cf == NULL)
 		{
+			outCode = "-- no such function ";
+			outCode.append(functionNum);
+		}
+		else
+		{
+			outCode = cf->decompile(0);
+
+			string upvals = cf->listUpvalues();
+			if (!upvals.empty())
+			{
+				stringstream ss;
+				ss << "local " << upvals;
+				output.addText(ss.str());
+			}
+
 			stringstream ss;
-			ss << "local " << upvals;
+			ss << "DecompiledFunction_" << functionNum << "=";
 			output.addText(ss.str());
 		}
-
-		stringstream ss;
-		ss << "DecompiledFunction_" << functionNum << "=";
-		output.addText(ss.str());
 	}
 	else
 	{
@@ -94,7 +100,16 @@ void LuaDec::disassemble(string outputFileName, string functionNum, bool nosub)
 	string outCode;
 	if (functionNum != "0")
 	{
-		outCode = luaGlobal.findSubFunction(functionNum)->disassemble();
+		Function* cf = luaGlobal.findSubFunction(functionNum);
+		if (cf == NULL)
+		{
+			outCode = "-- no such function ";
+			outCode.append(functionNum);
+		}
+		else
+		{
+			outCode = cf->disassemble();
+		}
 	}
 	else
 	{
